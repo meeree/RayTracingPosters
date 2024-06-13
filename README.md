@@ -26,9 +26,9 @@ where `width` and `height` are in pixels and `outputfile.tga` is the output file
 
 # "Stella Corris" Fractal
 
-I came up with this fractal back in 2016 ([first try rendering](https://youtu.be/gbqG23NxaAY?si=zRkwD5SSsJEuIC2b), [second try, a year later](https://www.youtube.com/watch?v=I6SrVbbiJyw)). It turns out to be an example of a "hyper-complex fractal." 
+I came up with this fractal back in 2016 ([first try rendering](https://youtu.be/gbqG23NxaAY?si=zRkwD5SSsJEuIC2b), using a bunch of 2D slices in X-Y-Z, [second try, a year later](https://www.youtube.com/watch?v=I6SrVbbiJyw), using marching cubes and random triangles). It turns out to be an example of a "[hyper-complex fractal](http://www.bugman123.com/Hypercomplex/)." 
 
-With my code here, I can explore it in much better detail:
+With my ray-tracing code here, I can explore it in much better detail:
 
 ![image info](stella_map.jpg)
 
