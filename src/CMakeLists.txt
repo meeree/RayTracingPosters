@@ -20,8 +20,8 @@ endif()
 
 set (LODEPNG_SOURCE "../deps/lodepng/lodepng.cpp")
 
-file(GLOB FRACTAL_SOURCE "fractal.cpp")
-set (FRACTAL_BINARY_NAME "fractal")
+file(GLOB FRACTAL_SOURCE "trace.cpp")
+set (FRACTAL_BINARY_NAME "trace")
 
 # Copy Shaders.
 configure_file("vert.glsl" ${CMAKE_CURRENT_BINARY_DIR}/.. COPYONLY)
