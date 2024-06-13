@@ -23,3 +23,13 @@ The code can be run as an executable with optional arguments:
 `./trace [width height] [outputfile.tga]`
 
 where `width` and `height` are in pixels and `outputfile.tga` is the output filename, which must be a tga.
+
+# "Stella Corris" Fractal
+
+I came up with this fractal back in 2016 ([first try rendering](https://youtu.be/gbqG23NxaAY?si=zRkwD5SSsJEuIC2b), [second try, a year later](https://www.youtube.com/watch?v=I6SrVbbiJyw)). It turns out to be an example of a "hyper-complex fractal." 
+
+With my code here, I can explore it in much better detail:
+
+![image info](stella_map.jpg)
+
+One really cool detail are the mandelbrots which are apparent in the "mini bulb" on the bottom left. 
