@@ -1,7 +1,7 @@
 ![Banner](out_v2_bloom.jpg)
 
 # RayTracingPosters
-Some simple code in opengl for raytracing high-resolution posters. 
+Some simple code in opengl for raytracing high-resolution posters. Also, supports interactive rendering. 
 
 # Cloning
 **To clone:** `git clone --recurse-submodules https://github.com/meeree/RayTracingPosters.git` 
