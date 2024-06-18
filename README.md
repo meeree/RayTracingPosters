@@ -1,4 +1,4 @@
-![image info](out_v2_bloom.jpg)
+![Banner](out_v2_bloom.jpg)
 
 # RayTracingPosters
 Some simple code in opengl for raytracing high-resolution posters. 
@@ -30,6 +30,8 @@ I came up with this fractal back in 2016 ([first try rendering](https://youtu.be
 
 With my ray-tracing code here, I can explore it in much better detail:
 
-![image info](stella_map.jpg)
+![Map](stella_map.jpg)
 
 One really cool detail are the mandelbrots which are apparent in the "mini bulb" on the bottom left. 
+
+<img src="animated.gif" width="400" height="400" />
