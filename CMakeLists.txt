@@ -31,6 +31,4 @@ ${PROJECT_SOURCE_DIR}/deps/lodepng")
 include_directories(SYSTEM ${INCLUDE_DIRS})
 
 # This should be the last subdir / include
-include_directories(${PROJECT_SOURCE_DIR}/src/cpp)
 add_subdirectory(src)
-

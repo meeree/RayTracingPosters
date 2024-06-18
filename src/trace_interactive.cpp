@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <vector>
 #include <iostream>
@@ -27,9 +28,16 @@ int main(int argc, char *argv[])
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make macOS happy; should not be needed
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	// Open a window and create its OpenGL context
-    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // Invisible window.
-	GLFWwindow* window = glfwCreateWindow( 1, 1, "Fractal Render", NULL, NULL); // Spoof 1 pixel window. Not needed for FBO rendering.
+	// Open a window and create its OpenGL context. Unlike in non-interactive tracing, we actually use the window.
+    int width = 900;
+    int height = 333;
+    if(argc > 2)
+    {
+        width = atoi(argv[1]);
+        height = atoi(argv[2]);
+    }
+
+	GLFWwindow* window = glfwCreateWindow( width, height, "Interactive Tracing", NULL, NULL);
 	if( window == NULL ){
 		fprintf( stderr, "Failed to open GLFW window.\n" );
 		getchar();
@@ -46,20 +54,6 @@ int main(int argc, char *argv[])
         std::terminate();
     }
 
-    int width = 9000;
-    int height = 3333;
-    if(argc > 2)
-    {
-        width = atoi(argv[1]);
-        height = atoi(argv[2]);
-    }
-
-    char const* out_file = "out.tga";
-    if(argc > 3)
-    {
-        out_file = argv[3];
-    }
-    
     // Set the mouse at the center of the screen
     glfwPollEvents();
 
@@ -72,6 +66,7 @@ int main(int argc, char *argv[])
 
 	// Create and compile our GLSL program from the shaders
 	GLuint programID = LoadShaders( "vert.glsl", "frag.glsl" );
+	GLuint timeID = glGetUniformLocation(programID, "time");
 
 	static const GLfloat g_quad_vertex_buffer_data[] = { 
 		-1.0f, -1.0f, 0.0f,
@@ -121,14 +116,26 @@ int main(int argc, char *argv[])
                                    
 	GLuint resolutionID = glGetUniformLocation(programID, "resolution");
     std::cout << " Beginning rendering. GPU vendor: " << glGetString(GL_VENDOR) << std::endl;
+    std::cout << " Window width and height : " << (short)width << ", " << (short)height << std::endl;
 
 	// Always check that our framebuffer is ok
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		return false;
-	
-	{
-        std::cout << " Window width and height : " << (short)width << ", " << (short)height << std::endl;
 
+    GLuint quad_vertexbuffer;
+	glGenBuffers(1, &quad_vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+
+	// Create and compile our GLSL program from the shaders
+	GLuint quad_programID = LoadShaders( "vert_interactive.glsl", "frag_interactive.glsl" );
+	GLuint texID = glGetUniformLocation(quad_programID, "renderedTexture");
+
+    float desired_dt = 0.2;
+    float prev_time = 0.0;
+
+    while(!glfwWindowShouldClose(window))
+	{
 		// Render to our framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
 		glViewport(0,0,width,height); // Render on the whole framebuffer, complete from the lower left corner to the upper right
@@ -139,6 +146,7 @@ int main(int argc, char *argv[])
 		// Use our shader
 		glUseProgram(programID);
         glUniform2i(resolutionID, width, height);
+		glUniform1f(timeID, (float)glfwGetTime());
 
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
@@ -158,16 +166,57 @@ int main(int argc, char *argv[])
                                           
 		glDisableVertexAttribArray(0);
 
+        // Now, render to the screen
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0,0,width,height);
+
+		// Clear the screen
+		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// Use our shader
+		glUseProgram(quad_programID);
+
+		// Bind our texture in Texture Unit 0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, renderedTexture);
+		// Set our "renderedTexture" sampler to use Texture Unit 0
+		glUniform1i(texID, 0);
+
+		// 1rst attribute buffer : vertices
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+		glVertexAttribPointer(
+			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
+		);
+
+		// Draw the triangles !
+		glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
+
+		glDisableVertexAttribArray(0);
+
+		// Swap buffers
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+        glfwSetWindowTitle(window, ("Trace Interactive, t = " + std::to_string(glfwGetTime())).c_str());
+
         // Save to file. Involves glReadPixels to get frameBuffer contents, then saving to out.tga.
         int* contents = new int[ width * width * 3 ];
         glReadPixels( 0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, contents );
-        FILE *out = fopen(out_file, "w");
+        FILE *out = fopen(("anim/out_" + std::to_string(glfwGetTime()) + ".tga").c_str(), "w");
         short  TGAhead[] = {0, 2, 0, 0, 0, 0, (short)width, (short)height, 24};
         fwrite(&TGAhead, sizeof(TGAhead), 1, out);
         fwrite(contents, 3 * width * height, 1, out);
         fclose(out);
+        
+        float dt = glfwGetTime() - prev_time;
+        usleep(int(1000000 * (desired_dt - dt))); 
+        prev_time = glfwGetTime();
 	}
-    std::cout << " Done rendering! Saved to file 'out.tga'. All done :) " << std::endl;
 
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &vertexbuffer);

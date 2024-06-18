@@ -107,8 +107,8 @@ vec3 render( in vec3 ro, in vec3 rd )
         vec3 nor = normal(pos);
         float val = sdf(pos);
        
-//        col = 2.5 * vec3(36., 30., 78.) / 255.;
-        col = .2 * vec3(237., 222., 164.) / 255.;
+        col = 2.5 * vec3(36., 30., 78.) / 255.;
+//        col = .2 * vec3(237., 222., 164.) / 255.;
         col *= nor * .4 + .6;
 //        col = col * (1. - val);
         float ks = 1.0;
@@ -157,7 +157,7 @@ vec3 render( in vec3 ro, in vec3 rd )
     }
     else
     {
-         col = vec3(.96, .96, .96);
+         col = vec3(.99, .99, .99);
     }
     
     col = pow(col, vec3(.4545)); // Gamma correct.
@@ -166,9 +166,7 @@ vec3 render( in vec3 ro, in vec3 rd )
 void main()
 {
     // pixel
-    vec2 p = UV * 2. - 1.;
-    p = (-vec2(resolution) + 2.0*gl_FragCoord.xy) / float(resolution.y);
-   // p.x = p.x / 2.; // OPTIONAL: Stretch screen.
+    vec2 p = (-vec2(resolution) + 2.0*gl_FragCoord.xy) / float(resolution.y);
 
     // camera ray    
     vec3 ro = vec3(0., 0., 1.9);
@@ -176,17 +174,17 @@ void main()
     
     // Position Camera.
 //    float t = 4. * 3.1415 * iMouse.x / iResolution.x;
-    float t = 1.4;
+    float t = 1.3 + .5 * time;
     float c = cos(t);
     float s = sin(t);
     mat3 m = mat3(c, 0., s, 0., 1., 0., -s, 0., c);
     ro = m * ro;
+    ro = ro * (.4 + (.5 * sin(t) + .5));
     rd = m * rd;
     
     ro.z += .4;
-    ro.y += .2;
+    ro.y -= .3;
     
-    rd /= 4.;
     color = render( ro, rd );
 
     // vignetting	
