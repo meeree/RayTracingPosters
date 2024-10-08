@@ -10,12 +10,12 @@ You need to get the submodules, since these are the external code dependencies. 
 
 # Installation
 Just use CMake. On Windows, you can use the GUI. On linux, you run the following:
-`
+<code>
 mkdir build
 cd build
 cmake ..
 make -j8
-`
+</code>
 
 # Running
 The code can be run as an executable with optional arguments:
